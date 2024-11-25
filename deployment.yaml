@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+  labels:
+    app: nodejs-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+        admission.datadoghq.eu/enabled: "true" 
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.eu/js-lib.version: "v3.10.0" 
+    spec:
+      containers:
+        - name: nodejs-app
+          image: 536697270880.dkr.ecr.eu-north-1.amazonaws.com/nodejs-repo
+          ports:
+            - containerPort: 3001
+          resources:
+            requests: 
+              memory: "128Mi"
+              cpu: "250m"
+            limits: 
+              memory: "256Mi"
+              cpu: "500m"
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-app-service
+spec:
+  type: NodePort
+  selector:
+    app: nodejs-app
+  ports:
+    - protocol: TCP
+      port: 80          
+      targetPort: http  
+      nodePort: 32767
+
